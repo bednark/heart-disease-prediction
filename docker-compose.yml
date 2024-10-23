@@ -1,0 +1,20 @@
+services:
+  # cosmosdb:
+  #   container_name: cosmosdb
+  #   image:  mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:latest
+  #   tty: true
+  #   stdin_open: true
+  #   ports:
+  #     - 8081:8081
+  #     - 10250-10255:10250-10255
+  #   volumes:
+  #     - ./cosmosdrive:/tmp/cosmos/appdata
+  #   environment:
+  #     - AZURE_COSMOS_EMULATOR_ENABLE_DATA_PERSISTENCE="true"
+  #     - AZURE_COSMOS_EMULATOR_IP_ADDRESS_OVERRIDE="192.168.10.8"
+  redis:
+    container_name: redis
+    image: redis/redis-stack-server
+    ports:
+      - 6379:6379
+    command: redis-server --requirepass QtTE5B7LDdd5VSKUS8va

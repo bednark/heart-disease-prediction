@@ -1,0 +1,10 @@
+flask
+flask-restful
+flask-marshmallow
+flask-jwt-extended
+flask-swagger-ui
+flask-cors
+gevent
+redis
+azure-cosmos
+python-dotenv
