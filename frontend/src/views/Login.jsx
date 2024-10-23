@@ -13,9 +13,9 @@ export default function Login() {
     };
 
     axios.post(`http://localhost:8080/auth`, credentials, { withCredentials: true }).then((res) => {
-      console.log(res);
+      // console.log(res);
     }).catch((err) => {
-      console.error(err);
+      // console.error(err);
     });
   };
 

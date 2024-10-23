@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, IconButton } from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
-import EditIcon from '@mui/icons-material/Edit';
-import LockResetIcon from '@mui/icons-material/LockReset';
-import AddIcon from '@mui/icons-material/Add';
+import { Clear, Edit, LockReset, Add } from '@mui/icons-material';
 import Header from '../components/Header';
 import UserEditPopup from '../components/UserEditPopup';
 import DeleteConfirmPopup from '../components/DeleteConfirmPopup';
@@ -108,13 +105,13 @@ const Admin = () => {
                   <TableCell align="center" sx={{ padding: '4px' }}>{user.group}</TableCell>
                   <TableCell align="right" sx={{ padding: '4px' }}>
                     <IconButton onClick={() => editDialogHandler('edit', index)}>
-                      <EditIcon />
+                      <Edit />
                     </IconButton>
                     <IconButton onClick={() => editDialogHandler('reset', index)}>
-                      <LockResetIcon />
+                      <LockReset />
                     </IconButton>
                     <IconButton onClick={() => confirmDeleteUser(index)}>
-                      <ClearIcon />
+                      <Clear />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -126,14 +123,16 @@ const Admin = () => {
 
       <div style={{ display: 'flex', justifyContent: 'end', marginTop: '20px', marginRight: '20px' }}>
         <Button variant="contained" color="primary" onClick={() => editDialogHandler('add')}>
-          <AddIcon />
+          <Add />
         </Button>
       </div>
 
       {(editUser && isEditDialogOpen) && (<UserEditPopup editUser={ editUser } isDialogOpen={ isEditDialogOpen }
         saveUser={ saveUser } closeDialog={editDialogHandler} task={ editTask } />)}
 
-      <DeleteConfirmPopup isDialogOpen={isDeleteDialogOpen} confirm={deleteUser} />
+      <DeleteConfirmPopup isDialogOpen={isDeleteDialogOpen}
+      confirm={deleteUser}
+      message="Czy napewno chcesz usunąć wybranego użytkownika?" />
     </>
   );
 };

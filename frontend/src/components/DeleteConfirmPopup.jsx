@@ -1,12 +1,12 @@
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, Typography, DialogActions, Button } from "@mui/material";
 
-const DeleteConfirmPopup = ({ isDialogOpen, confirm }) => {
+const DeleteConfirmPopup = ({ isDialogOpen, confirm, message }) => {
   return (
     <Dialog open={isDialogOpen} fullWidth>
       <DialogTitle>Potwierdź</DialogTitle>
       <DialogContent>
-        <Typography>Czy na pewno chcesz usunąć tego użytkownika?</Typography>
+        <Typography>{ message }</Typography>
       </DialogContent>
       <DialogActions>
         <Button  color="primary" onClick={() => confirm(false)}>

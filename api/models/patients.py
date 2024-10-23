@@ -42,6 +42,14 @@ class PatientsModel:
     items = list(container.query_items(query, enable_cross_partition_query=True))
     return items
 
+  def get_by_id(id):
+    query = f'SELECT * FROM p WHERE p.id="{id}"'
+    item = list(container.query_items(query, enable_cross_partition_query=True))
+    if item:
+      return item[0]
+    else:
+      return { 'msg': 'Pacjent nie istnieje' }, 404
+
   def create_item(self):
     item = {
       'firstname': self.firstname,
@@ -67,16 +75,16 @@ class PatientsModel:
     try:
       patient = container.create_item(body=item, enable_automatic_id_generation=True)
       return {
-        'msg': 'Patient added successfuly',
+        'msg': 'Predykcja wykonana pomyślnie',
         'id': patient['id'],
         'result': patient['result']
       }, 201
     except CosmosResourceExistsError:
-      return { 'msg': 'Unique index constraint violation' }, 409
+      return { 'msg': 'Pacjent o takim numerze PESEL już istnieje' }, 409
 
   def delete_item(item):
     try:
       container.delete_item(item=item, partition_key=item['pesel'])
-      return { 'msg': 'Patient deleted successfuly' }, 200
+      return { 'msg': 'Pacjent usunięty pomyślnie' }, 200
     except TypeError:
-      return { 'msg': 'Patient not found' }, 404
+      return { 'msg': 'Pacjent nie istnieje' }, 404

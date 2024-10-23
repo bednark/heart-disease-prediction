@@ -12,7 +12,7 @@ def validate_pesel(value):
   reg = re.compile(r'^[0-9]{11}$')
 
   if not reg.match(value):
-    raise ValidationError('Invalid PESEL')
+    raise ValidationError('Wprowadzono niepoprawny PESEL')
   else:
     digits = list(map(int, value))
     checksum = (1 * digits[0] + 3 * digits[1] + 7 * digits[2] + 9 * digits[3] +
@@ -25,19 +25,19 @@ def validate_pesel(value):
     checksum = 10 - checksum
 
     if int(value[10]) != checksum:
-      raise ValidationError('Invalid PESEL')
+      raise ValidationError('Wprowadzono niepoprawny PESEL')
 
 def validate_email(value):
   if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
-    raise ValidationError('Invalid email')
+    raise ValidationError('Wprowadzono niepoprawny adres email')
 
 def validate_phone(value):
   if not re.match(r'^\+?[\d\- ]{8,15}$', value):
-    raise ValidationError('Invalid phone number')
-  
+    raise ValidationError('Wprowadzono niepoprawny numer telefonu')
+
 def pesel_to_sex(pesel):
   penultimate_number = int(pesel[-2])
-    
+
   if penultimate_number % 2 == 0:
     return 1
   else:
@@ -47,7 +47,7 @@ def pesel_to_age(pesel):
     year = int(pesel[0:2])
     month = int(pesel[2:4])
     day = int(pesel[4:6])
-    
+
     if month > 80:
         year += 1800
         month -= 80
@@ -56,14 +56,14 @@ def pesel_to_age(pesel):
         month -= 20
     else:
         year += 1900
-    
+
     birth_date = datetime(year, month, day)
     today = datetime.now()
     age = today.year - birth_date.year
 
     if (today.month, today.day) < (birth_date.month, birth_date.day):
         age -= 1
-    
+
     return age
 
 class PatientSchema(Schema):
@@ -116,7 +116,7 @@ class PatientsResource(Resource):
     try:
       validated_data = PatientSchema().load(request.json)
     except ValidationError as e:
-      return e.messages, 400
+      return { 'msg': e.messages }, 400
 
     validated_data['sex'] = pesel_to_sex(validated_data['pesel'])
     validated_data['age'] = pesel_to_age(validated_data['pesel'])
