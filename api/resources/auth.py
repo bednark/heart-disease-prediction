@@ -21,14 +21,14 @@ class AuthResource(Resource):
     user = UsersModel.get_by_username(validated_data['username'])
 
     if 404 in user:
-      return { 'msg': 'Invalid credentials' }, 401
+      return { 'msg': 'Niepoprawny login lub hasło' }, 401
 
     salt = bytes.fromhex(user['salt'])
     password_salted = validated_data['password'].encode() + salt
     password_hash = hashlib.sha256(password_salted).hexdigest()
 
     if password_hash != user['password_hash']:
-      return { 'msg': 'Invalid credentials' }, 401
+      return { 'msg': 'Niepoprawny login lub hasło' }, 401
 
     access_token_exp = int(time.time()) + 3600
     refresh_token_exp = int(time.time()) + 86400
@@ -58,7 +58,7 @@ class TokenRefreshResource(Resource):
     if redis_access_keys.exists(current_user):
       return { 'msg': 'Access token is not expired' }, 400
 
-    claims = { 
+    claims = {
       'access_group': get_jwt()['access_group'],
       'exp': access_token_exp
     }
@@ -67,7 +67,10 @@ class TokenRefreshResource(Resource):
     redis_access_keys.set(current_user, access_token)
     redis_access_keys.expireat(current_user, access_token_exp)
 
-    return { 'access_token': access_token }, 200
+    response = make_response({ 'msg': 'Authentication successful' }, 200)
+    response.set_cookie('access_token', access_token, httponly=True, secure=True, samesite='Strict', max_age=3600)
+
+    return response
 
 class TokenRevokeResource(Resource):
   @jwt_required()
@@ -78,8 +81,17 @@ class TokenRevokeResource(Resource):
       redis_blocklist.set(jwt_data['jti'], "")
       redis_blocklist.expireat(jwt_data['jti'], jwt_data['exp'])
 
-    return { 'msg': 'Token revoked' }, 200
+    response = make_response({ 'msg': 'Token revoked' }, 200)
+    response.set_cookie('access_token_cookie', '', expires=0, httponly=True, samesite='Strict')
+    response.set_cookie('refresh_token_cookie', '', expires=0, httponly=True, samesite='Strict')
+    return response
+
+class AuthCheckResource(Resource):
+  @jwt_required()
+  def get(self):
+    return '', 204
 
 api.add_resource(AuthResource, '/auth')
 api.add_resource(TokenRefreshResource, '/auth/refresh')
 api.add_resource(TokenRevokeResource, '/auth/revoke')
+api.add_resource(AuthCheckResource, '/auth/check')
