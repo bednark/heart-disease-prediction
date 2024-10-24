@@ -70,20 +70,20 @@ class UsersModel:
     }
     try:
       container.create_item(body=item, enable_automatic_id_generation=True)
-      return { 'msg': 'User added successfuly' }, 201
+      return { 'msg': 'Użytkownik dodany pomyślnie' }, 201
     except CosmosResourceExistsError:
-      return { 'msg': 'Unique index constraint violation' }, 409
+      return { 'msg': 'Nazwa użytkownika jest zajęta' }, 409
 
   def upsert_item(item):
     try:
-      container.upsert_item(body=item)
-      return { 'msg': 'User updated successfuly' }, 200
+      user = container.upsert_item(body=item)
+      return { 'msg': 'Użytkownik edytowany pomyślnie', 'id': user['id'] }, 200
     except CosmosHttpResponseError:
-      return { 'msg': 'User not found' }, 404
+      return { 'msg': 'Użytkownik nie istnieje' }, 404
 
   def delete_item(item):
     try:
       container.delete_item(item=item, partition_key=item['username'])
-      return { 'msg': 'User deleted successfuly' }, 200
+      return { 'msg': 'Użytkownik usunięty pomyślnie' }, 200
     except TypeError:
-      return { 'msg': 'User not found' }, 404
+      return { 'msg': 'Użytkownik nie istnieje' }, 404

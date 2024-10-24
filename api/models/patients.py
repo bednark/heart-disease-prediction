@@ -77,7 +77,9 @@ class PatientsModel:
       return {
         'msg': 'Predykcja wykonana pomyślnie',
         'id': patient['id'],
-        'result': patient['result']
+        'result': patient['result'],
+        'age': patient['age'],
+        'sex': patient['sex']
       }, 201
     except CosmosResourceExistsError:
       return { 'msg': 'Pacjent o takim numerze PESEL już istnieje' }, 409

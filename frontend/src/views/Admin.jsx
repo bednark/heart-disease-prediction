@@ -1,29 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Table, TableBody, TableCell, TableContainer,
   TableHead, TableRow, Paper, IconButton } from '@mui/material';
 import { Clear, Edit, LockReset, Add } from '@mui/icons-material';
 import Header from '../components/Header';
 import UserEditPopup from '../components/UserEditPopup';
 import DeleteConfirmPopup from '../components/DeleteConfirmPopup';
+import NotificationSnackbar from '../components/NotificationSnackbar';
+import api from '../api';
 
 const Admin = () => {
-  const [users, setUsers] = useState([
-    { firstName: 'John', lastName: 'Doe', username: 'johndoe', group: 'Użytkownicy' },
-    { firstName: 'Jane', lastName: 'Smith', username: 'janesmith', group: 'Administratorzy' },
-    { firstName: 'Alice', lastName: 'Johnson', username: 'alicejohnson', group: 'Użytkownicy' },
-    { firstName: 'Bob', lastName: 'Brown', username: 'bobbrown', group: 'Administratorzy' },
-    { firstName: 'Charlie', lastName: 'Davis', username: 'charliedavis', group: 'Użytkownicy' },
-    { firstName: 'David', lastName: 'Wilson', username: 'davidwilson', group: 'Użytkownicy' },
-    { firstName: 'Eve', lastName: 'Taylor', username: 'evetaylor', group: 'Administratorzy' },
-    { firstName: 'Frank', lastName: 'Anderson', username: 'frankanderson', group: 'Użytkownicy' },
-    { firstName: 'Grace', lastName: 'Thomas', username: 'gracethomas', group: 'Administratorzy' },
-    { firstName: 'Hank', lastName: 'Moore', username: 'hankmoore', group: 'Użytkownicy' }
-  ]);
+  const [users, setUsers] = useState([]);
   const [editUser, setEditUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editTask, setEditTask] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('');
+
+  useEffect(() => {
+    api.get('/users').then(res => {
+      setUsers(res.data);
+    }).catch(() => {});
+  }, []);
+
+  const closeSnackbar = () => setOpenSnackbar(false);
 
   const confirmDeleteUser = (index) => {
     setUserToDelete(index);
@@ -38,7 +40,7 @@ const Admin = () => {
     }
 
     if(task === 'add')
-      setEditUser({ firstName: '', lastName: '', username: '', group: '', password: '' });
+      setEditUser({ firstname: '', lastname: '', username: '', access_group: '', password: '' });
     else if(task === 'edit')
       setEditUser({ ...users[index], index });
     else if(task === 'reset') {
@@ -52,30 +54,55 @@ const Admin = () => {
     setIsEditDialogOpen(true);
   };
 
-  const saveUser = (task, userToSave) => {
+  const openErrorSnackbar = (message) => {
+    if (typeof message === 'object') {
+      const errors = Object.keys(message).map((key) => [key, message[key]]);
+      setSnackbarMessage(errors[0][1]);
+    }
+    else
+      setSnackbarMessage(message);
+    setSnackbarSeverity('error');
+    setOpenSnackbar(true);
+  }
+
+  const saveUser = async (task, userToSave) => {
     var updatedUsers = users;
+    const { id, index, ...user } = userToSave;
     if(task === 'add') {
       updatedUsers = [...users, userToSave];
+      await api.post('/users', user).then((res) => {
+        setUsers(updatedUsers);
+        setSnackbarMessage(res.data.msg);
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
+        editDialogHandler('close');
+      }).catch(err => openErrorSnackbar(err.response.data));
     }
-    else if(task === 'edit') {
-      updatedUsers = users.map((user, i) =>
-        i === userToSave.index ? { firstName: userToSave.firstName, lastName: userToSave.lastName, username: userToSave.username, group: userToSave.group } : user
-      );
+    else if(task === 'reset' || task === 'edit') {
+      await api.put(`/user/${userToSave.id}`, user).then((res) => {
+        updatedUsers = users.map((user, i) =>
+          i === index ? { id: res.data.id, firstname: userToSave.firstname, lastname: userToSave.lastname,
+            username: userToSave.username, access_group: userToSave.access_group } : user
+        );
+        setUsers(updatedUsers);
+        setSnackbarMessage(res.data.msg);
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
+        editDialogHandler('close');
+      }).catch(err => openErrorSnackbar(err.response.data));
     }
-    else if(task === 'reset') {
-      console.log('reset')
-    }
-    setUsers(updatedUsers);
-    editDialogHandler('close');
   };
 
-  const deleteUser = (confirm) => {
+  const deleteUser = async (confirm) => {
     if(confirm) {
-      const newUsers = users.filter((user, index) => index !== userToDelete);
-      setUsers(newUsers);
+      await api.delete(`/user/${users[userToDelete].id}`).then((res) => {
+        const newUsers = users.filter((user, index) => index !== userToDelete);
+        setUsers(newUsers);
+        setSnackbarMessage(res.data.msg);
+        setSnackbarSeverity('success');
+        setOpenSnackbar(true);
+      }).catch(err => openErrorSnackbar(err.response.data));
     }
-
-    console.log(users);
     setUserToDelete(null);
     setIsDeleteDialogOpen(false);
   };
@@ -99,10 +126,12 @@ const Admin = () => {
             <TableBody>
               {users.map((user, index) => (
                 <TableRow key={index} sx={{ height: '30px' }}>
-                  <TableCell align="center" sx={{ padding: '4px' }}>{user.firstName}</TableCell>
-                  <TableCell align="center" sx={{ padding: '4px' }}>{user.lastName}</TableCell>
+                  <TableCell align="center" sx={{ padding: '4px' }}>{user.firstname}</TableCell>
+                  <TableCell align="center" sx={{ padding: '4px' }}>{user.lastname}</TableCell>
                   <TableCell align="center" sx={{ padding: '4px' }}>{user.username}</TableCell>
-                  <TableCell align="center" sx={{ padding: '4px' }}>{user.group}</TableCell>
+                  <TableCell align="center" sx={{ padding: '4px' }}>
+                    {user.access_group === 'AuthenticatedUser' ? 'Użytkownik' : user.access_group}
+                  </TableCell>
                   <TableCell align="right" sx={{ padding: '4px' }}>
                     <IconButton onClick={() => editDialogHandler('edit', index)}>
                       <Edit />
@@ -130,6 +159,7 @@ const Admin = () => {
       {(editUser && isEditDialogOpen) && (<UserEditPopup editUser={ editUser } isDialogOpen={ isEditDialogOpen }
         saveUser={ saveUser } closeDialog={editDialogHandler} task={ editTask } />)}
 
+      <NotificationSnackbar openSnackbar={openSnackbar} closeSnackbar={closeSnackbar} message={snackbarMessage} severity={snackbarSeverity} />
       <DeleteConfirmPopup isDialogOpen={isDeleteDialogOpen}
       confirm={deleteUser}
       message="Czy napewno chcesz usunąć wybranego użytkownika?" />

@@ -9,13 +9,13 @@ from models.users import UsersModel
 
 def validate_password(value):
   if len(value) < 8:
-    raise ValidationError("Password must be at least 8 characters long")
+    raise ValidationError("Hasło musi zawierać co najmniej 8 znaków")
   if not any(char.isupper() for char in value):
-    raise ValidationError("Password must contain at least one uppercase letter")
+    raise ValidationError("Hasło musi zawierać co najmniej jedną dużą literę")
   if not any(char.islower() for char in value):
-    raise ValidationError("Password must contain at least one lowercase letter")
+    raise ValidationError("Hasło musi zawierać co najmniej jedną małą literę")
   if not any(char.isdigit() for char in value):
-    raise ValidationError("Password must contain at least one digit")
+    raise ValidationError("Hasło musi zawierać co najmniej jedną cyfrę")
 
 def hash_password(password):
   salt = secrets.token_bytes(16)
@@ -56,7 +56,18 @@ class UsersSchema(Schema):
 class UsersResource(Resource):
   @admin_required()
   def get(self):
-    return jsonify(UsersModel.get_all())
+    users = UsersModel.get_all()
+    result = [
+      {
+        'id': user['id'],
+        'firstname': user['firstname'],
+        'lastname': user['lastname'],
+        'username': user['username'],
+        'access_group': user['access_group']
+      }
+      for user in users
+    ]
+    return jsonify(result)
 
   @admin_required()
   def post(self):
