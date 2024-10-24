@@ -33,6 +33,8 @@ class AuthResource(Resource):
     access_token_exp = int(time.time()) + 3600
     refresh_token_exp = int(time.time()) + 86400
     claims = {
+      'firstname': user['firstname'],
+      'lastname': user['lastname'],
       'access_group': user['access_group'],
       'exp': access_token_exp
     }
@@ -89,7 +91,13 @@ class TokenRevokeResource(Resource):
 class AuthCheckResource(Resource):
   @jwt_required()
   def get(self):
-    return '', 204
+    jwt_data = get_jwt()
+    fullname = f"{jwt_data['firstname']} {jwt_data['lastname']}"
+    access_group = jwt_data['access_group']
+    return {
+      'fullname': fullname,
+      'access_group': access_group
+    }, 200
 
 api.add_resource(AuthResource, '/auth')
 api.add_resource(TokenRefreshResource, '/auth/refresh')

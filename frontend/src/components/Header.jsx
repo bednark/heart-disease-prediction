@@ -6,11 +6,10 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import HomeIcon from '@mui/icons-material/Home';
 import api from '../api';
 
-const Header = ({ title }) => {
+const Header = ({ title, fullname, isAdmin }) => {
   const logout = () => {
-    api.get('/auth/revoke').then(() => {
-      window.location = '/login';
-    });
+    api.get('/auth/revoke').then(() => window.location = '/login')
+      .catch(() => window.location = '/login');
   };
 
   return (
@@ -20,7 +19,7 @@ const Header = ({ title }) => {
           { title }
         </Typography>
         <Typography variant="body1" style={{ marginRight: '20px' }}>
-          Zalogowany jako: John Doe
+          Zalogowany jako: { fullname }
         </Typography>
         <Button color="inherit" style={{ padding: 0, height: '100%' }}>
           <Link
@@ -38,22 +37,24 @@ const Header = ({ title }) => {
             <HomeIcon style={{ fontSize: '1.5rem' }} />
           </Link>
         </Button>
-        <Button color="inherit" style={{ padding: 0, height: '100%' }}>
-          <Link
-          to="/admin"
-          style={{
-            textDecoration: 'none',
-            color: 'inherit',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            height: '100%',
-            padding: '6px 16px',
-          }}>
-            <AdminPanelSettingsIcon style={{ fontSize: '1.5rem' }} />
-          </Link>
-        </Button>
+        {isAdmin ? (
+          <Button color="inherit" style={{ padding: 0, height: '100%' }}>
+            <Link
+            to="/admin"
+            style={{
+              textDecoration: 'none',
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+              height: '100%',
+              padding: '6px 16px',
+            }}>
+              <AdminPanelSettingsIcon style={{ fontSize: '1.5rem' }} />
+            </Link>
+          </Button>
+        ) : null }
         <Button color="inherit"
         style={{
           color: 'inherit',

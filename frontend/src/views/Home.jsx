@@ -7,7 +7,7 @@ import NotificationSnackbar from '../components/NotificationSnackbar';
 import DeleteConfirmPopup from '../components/DeleteConfirmPopup';
 import api from '../api';
 
-const Home = () => {
+const Home = ({ fullname, isAdmin }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -116,7 +116,7 @@ const Home = () => {
 
   return (
     <>
-      <Header title="Predykcja chorób serca" />
+      <Header title="Predykcja chorób serca" fullname={fullname} isAdmin={isAdmin} />
       <Box display="flex">
         <Box flex={1} p={2}>
           <form onSubmit={makePrediction}>

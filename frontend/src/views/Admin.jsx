@@ -8,7 +8,7 @@ import DeleteConfirmPopup from '../components/DeleteConfirmPopup';
 import NotificationSnackbar from '../components/NotificationSnackbar';
 import api from '../api';
 
-const Admin = () => {
+const Admin = ({ fullname, isAdmin }) => {
   const [users, setUsers] = useState([]);
   const [editUser, setEditUser] = useState(null);
   const [userToDelete, setUserToDelete] = useState(null);
@@ -109,7 +109,7 @@ const Admin = () => {
 
   return (
     <>
-      <Header title="Predykcja chorób serca - Panel Administratora" />
+      <Header title="Predykcja chorób serca - Panel Administratora" fullname={fullname} isAdmin={isAdmin} />
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', height: 'calc(100vh - 150px)' }}>
         <TableContainer component={Paper} style={{ height: '100%', overflow: 'auto', width: '100%' }}>
