@@ -144,6 +144,9 @@ class UserResource(Resource):
   @admin_required()
   def delete(self, id):
     user = UsersModel.get_by_id(id)
+    logged_user = get_jwt()['id']
+    if user['id'] == logged_user:
+      return { 'msg': 'Nie można usunąć własnego konta' }, 403
     return UsersModel.delete_item(user)
 
 api.add_resource(UsersResource, '/users')

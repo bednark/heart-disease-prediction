@@ -33,6 +33,7 @@ class AuthResource(Resource):
     access_token_exp = int(time.time()) + 3600
     refresh_token_exp = int(time.time()) + 86400
     claims = {
+      'id': user['id'],
       'firstname': user['firstname'],
       'lastname': user['lastname'],
       'access_group': user['access_group'],
@@ -60,8 +61,13 @@ class TokenRefreshResource(Resource):
     if redis_access_keys.exists(current_user):
       return { 'msg': 'Access token is not expired' }, 400
 
+    user = get_jwt()
+
     claims = {
-      'access_group': get_jwt()['access_group'],
+      'id': user['id'],
+      'firstname': user['firstname'],
+      'lastname': user['lastname'],
+      'access_group': user['access_group'],
       'exp': access_token_exp
     }
 
@@ -84,8 +90,8 @@ class TokenRevokeResource(Resource):
       redis_blocklist.expireat(jwt_data['jti'], jwt_data['exp'])
 
     response = make_response({ 'msg': 'Token revoked' }, 200)
-    response.set_cookie('access_token_cookie', '', expires=0, httponly=True, samesite='Strict')
-    response.set_cookie('refresh_token_cookie', '', expires=0, httponly=True, samesite='Strict')
+    response.set_cookie('access_token', '', expires=0, httponly=True, samesite='Strict')
+    response.set_cookie('refresh_token', '', expires=0, httponly=True, samesite='Strict')
     return response
 
 class AuthCheckResource(Resource):

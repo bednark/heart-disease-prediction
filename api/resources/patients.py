@@ -32,7 +32,7 @@ def validate_email(value):
     raise ValidationError('Wprowadzono niepoprawny adres email')
 
 def validate_phone(value):
-  if not re.match(r'^\+?[\d\- ]{8,15}$', value):
+  if not re.match(r'^(\+48)?\d{9}$', value):
     raise ValidationError('Wprowadzono niepoprawny numer telefonu')
 
 def pesel_to_sex(pesel):
@@ -113,6 +113,7 @@ class PatientsResource(Resource):
 
   @jwt_required()
   def post(self):
+    request.json['phone'] = request.json['phone'].replace(' ', '')
     try:
       validated_data = PatientSchema().load(request.json)
     except ValidationError as e:

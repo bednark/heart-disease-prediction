@@ -44,7 +44,7 @@ const Home = ({ fullname, isAdmin }) => {
       lastname: data.get('lastname'),
       pesel: data.get('pesel'),
       email: data.get('email'),
-      phone: data.get('phone'),
+      phone: data.get('phone').replace(' ', ''),
       cp: parseInt(data.get('cp')),
       trestbps: parseInt(data.get('trestbps')),
       chol: parseInt(data.get('chol')),

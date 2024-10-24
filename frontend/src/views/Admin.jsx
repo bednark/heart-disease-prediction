@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, IconButton } from '@mui/material';
+  TableHead, TableRow, Paper, IconButton, CircularProgress } from '@mui/material';
 import { Clear, Edit, LockReset, Add } from '@mui/icons-material';
 import Header from '../components/Header';
 import UserEditPopup from '../components/UserEditPopup';
@@ -18,11 +18,22 @@ const Admin = ({ fullname, isAdmin }) => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    api.get('/users').then(res => {
-      setUsers(res.data);
-    }).catch(() => {});
+    async function fetchData() {
+      await api.get('/users')
+        .then(res => {
+          setUsers(res.data);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError(true);
+          setLoading(false);
+        });
+      }
+    fetchData();
   }, []);
 
   const closeSnackbar = () => setOpenSnackbar(false);
@@ -111,44 +122,54 @@ const Admin = ({ fullname, isAdmin }) => {
     <>
       <Header title="Predykcja chorób serca - Panel Administratora" fullname={fullname} isAdmin={isAdmin} />
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', height: 'calc(100vh - 150px)' }}>
-        <TableContainer component={Paper} style={{ height: '100%', overflow: 'auto', width: '100%' }}>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow sx={{ height: '30px' }}>
-                <TableCell align="center" sx={{ padding: '4px' }}>Imię</TableCell>
-                <TableCell align="center" sx={{ padding: '4px' }}>Nazwisko</TableCell>
-                <TableCell align="center" sx={{ padding: '4px' }}>Nazwa użytkownika</TableCell>
-                <TableCell align="center" sx={{ padding: '4px' }}>Grupa</TableCell>
-                <TableCell align="right" sx={{ padding: '4px' }}></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map((user, index) => (
-                <TableRow key={index} sx={{ height: '30px' }}>
-                  <TableCell align="center" sx={{ padding: '4px' }}>{user.firstname}</TableCell>
-                  <TableCell align="center" sx={{ padding: '4px' }}>{user.lastname}</TableCell>
-                  <TableCell align="center" sx={{ padding: '4px' }}>{user.username}</TableCell>
-                  <TableCell align="center" sx={{ padding: '4px' }}>
-                    {user.access_group === 'AuthenticatedUser' ? 'Użytkownik' : user.access_group}
-                  </TableCell>
-                  <TableCell align="right" sx={{ padding: '4px' }}>
-                    <IconButton onClick={() => editDialogHandler('edit', index)}>
-                      <Edit />
-                    </IconButton>
-                    <IconButton onClick={() => editDialogHandler('reset', index)}>
-                      <LockReset />
-                    </IconButton>
-                    <IconButton onClick={() => confirmDeleteUser(index)}>
-                      <Clear />
-                    </IconButton>
-                  </TableCell>
+      {loading ? (
+        <div style={{ display: 'flex', height: 'calc(100vh - 150px)', justifyContent: 'center', alignItems: 'center' }}>
+          <CircularProgress />
+        </div>
+      ) : error ? (
+        <div style={{ display: 'flex', height: 'calc(100vh - 150px)', justifyContent: 'center', alignItems: 'center', color: 'red' }}>
+          Błąd pobierania danych
+        </div>
+      ) : (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px', height: 'calc(100vh - 150px)' }}>
+          <TableContainer component={Paper} style={{ height: '100%', overflow: 'auto', width: '100%' }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow sx={{ height: '30px' }}>
+                  <TableCell align="center" sx={{ padding: '4px' }}>Imię</TableCell>
+                  <TableCell align="center" sx={{ padding: '4px' }}>Nazwisko</TableCell>
+                  <TableCell align="center" sx={{ padding: '4px' }}>Nazwa użytkownika</TableCell>
+                  <TableCell align="center" sx={{ padding: '4px' }}>Grupa</TableCell>
+                  <TableCell align="right" sx={{ padding: '4px' }}></TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </div>
+              </TableHead>
+              <TableBody>
+                {users.map((user, index) => (
+                  <TableRow key={index} sx={{ height: '30px' }}>
+                    <TableCell align="center" sx={{ padding: '4px' }}>{user.firstname}</TableCell>
+                    <TableCell align="center" sx={{ padding: '4px' }}>{user.lastname}</TableCell>
+                    <TableCell align="center" sx={{ padding: '4px' }}>{user.username}</TableCell>
+                    <TableCell align="center" sx={{ padding: '4px' }}>
+                      {user.access_group === 'AuthenticatedUser' ? 'Użytkownik' : user.access_group}
+                    </TableCell>
+                    <TableCell align="right" sx={{ padding: '4px' }}>
+                      <IconButton onClick={() => editDialogHandler('edit', index)}>
+                        <Edit />
+                      </IconButton>
+                      <IconButton onClick={() => editDialogHandler('reset', index)}>
+                        <LockReset />
+                      </IconButton>
+                      <IconButton onClick={() => confirmDeleteUser(index)}>
+                        <Clear />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'end', marginTop: '20px', marginRight: '20px' }}>
         <Button variant="contained" color="primary" onClick={() => editDialogHandler('add')}>
