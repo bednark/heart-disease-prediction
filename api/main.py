@@ -51,8 +51,8 @@ create_initial_user()
 
 if __name__ == '__main__':
   if os.environ.get('FLASK_ENV') == 'test':
-    app.run(host='0.0.0.0', port=os.environ.get('PORT') or 8080)
+    app.run(host='0.0.0.0', port=8080)
   elif os.environ.get('FLASK_ENV') == 'prod':
-    print(f'SERVER IS LISTENING ON PORT {os.environ.get("PORT") or 8080}')
-    http_server = WSGIServer(('0.0.0.0', int(os.environ.get('PORT')) or 8080), app)
+    print('SERVER IS LISTENING ON PORT 8080')
+    http_server = WSGIServer(('0.0.0.0', 8080), app)
     http_server.serve_forever()

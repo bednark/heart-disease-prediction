@@ -1,5 +1,5 @@
 from azure.cosmos import PartitionKey
-from azure.cosmos.exceptions import CosmosResourceExistsError, CosmosHttpResponseError
+from azure.cosmos.exceptions import CosmosResourceExistsError
 from extentions import database
 
 container = database.create_container_if_not_exists(
