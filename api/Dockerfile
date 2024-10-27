@@ -5,12 +5,9 @@ WORKDIR /api
 COPY . .
 
 ENV FLASK_ENV=prod
-ENV PROTOCOL=http
-ENV HOST=localhost
-ENV PORT=8080
+ENV COSMOS_DB=heart-disease-prediction
 ENV REDIS_PORT=6380
 ENV REDIS_SSL=true
-ENV COSMOS_DB=heart-diesease-prediction
 
 EXPOSE $PORT
 

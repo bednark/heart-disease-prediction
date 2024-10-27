@@ -14,3 +14,4 @@ class TestConfig(Config):
 
 class ProductionConfig(Config):
   DEBUG = False
+  PROPAGATE_EXCEPTIONS = True
