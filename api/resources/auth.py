@@ -47,8 +47,8 @@ class AuthResource(Resource):
     refresh_token = create_refresh_token(identity=user['username'], additional_claims=claims)
 
     response = make_response({ 'msg': 'Authentication successful' }, 200)
-    response.set_cookie('access_token', access_token, httponly=True, secure=True, samesite='Strict', max_age=3600)
-    response.set_cookie('refresh_token', refresh_token, httponly=True, secure=True, samesite='Strict', max_age=86400)
+    response.set_cookie('access_token', access_token, httponly=True, secure=True, samesite='None', max_age=3600)
+    response.set_cookie('refresh_token', refresh_token, httponly=True, secure=True, samesite='None', max_age=86400)
 
     return response
 
@@ -76,7 +76,7 @@ class TokenRefreshResource(Resource):
     redis_access_keys.expireat(current_user, access_token_exp)
 
     response = make_response({ 'msg': 'Authentication successful' }, 200)
-    response.set_cookie('access_token', access_token, httponly=True, secure=True, samesite='Strict', max_age=3600)
+    response.set_cookie('access_token', access_token, httponly=True, secure=True, samesite='None', max_age=3600)
 
     return response
 
@@ -90,8 +90,8 @@ class TokenRevokeResource(Resource):
       redis_blocklist.expireat(jwt_data['jti'], jwt_data['exp'])
 
     response = make_response({ 'msg': 'Token revoked' }, 200)
-    response.set_cookie('access_token', '', expires=0, httponly=True, samesite='Strict')
-    response.set_cookie('refresh_token', '', expires=0, httponly=True, samesite='Strict')
+    response.set_cookie('access_token', '', expires=0, httponly=True, samesite='None')
+    response.set_cookie('refresh_token', '', expires=0, httponly=True, samesite='None')
     return response
 
 class AuthCheckResource(Resource):

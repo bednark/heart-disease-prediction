@@ -2,8 +2,9 @@ from flask import jsonify, request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required
 from marshmallow import Schema, fields, ValidationError, validate
-import re
+import re, os
 from datetime import datetime
+import requests, json
 
 from extentions import api
 from models.patients import PatientsModel
@@ -121,7 +122,33 @@ class PatientsResource(Resource):
 
     validated_data['sex'] = pesel_to_sex(validated_data['pesel'])
     validated_data['age'] = pesel_to_age(validated_data['pesel'])
-    validated_data['result'] = 90 # Azure ML response
+
+    request_body = {
+      'data': [[
+        validated_data['age'],
+        validated_data['sex'],
+        validated_data['cp'],
+        validated_data['trestbps'],
+        validated_data['chol'],
+        validated_data['fbs'],
+        validated_data['restecg'],
+        validated_data['thalach'],
+        validated_data['exang'],
+        validated_data['oldpeak'],
+        validated_data['slope'],
+        validated_data['ca'],
+        validated_data['thal']
+      ]]
+    }
+
+    request_body = json.dumps(request_body)
+    request_headers = {
+      'Content-Type': 'application/json'
+    }
+
+    response = requests.post(os.environ.get('MODEL_URI'), data=request_body, headers=request_headers)
+
+    validated_data['result'] = response.json()['probability'][0]
 
     new_patient = PatientsModel(**validated_data)
     return new_patient.create_item()

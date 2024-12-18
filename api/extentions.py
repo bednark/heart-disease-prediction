@@ -19,6 +19,9 @@ if 'COSMOS_URI' not in os.environ:
 if 'COSMOS_SECRET' not in os.environ:
   raise RuntimeError('COSMOS_SECRET variable is not set')
 
+if 'MODEL_URI' not in os.environ:
+  raise RuntimeError('MODEL_URI variable is not set')
+
 connection_verify = os.environ.get('FLASK_ENV') == 'prod'
 redis_ssl = os.environ.get('REDIS_SSL') == 'true' if 'REDIS_SSL' in os.environ else True
 
